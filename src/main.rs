@@ -4,7 +4,7 @@ mod userhandling;
 mod config;
 mod animations;
 
-use animations::Animation;
+use animations::{Animation, AnimController};
 use config::Config;
 use resources::Resources;
 use userhandling::UserHandler;
@@ -12,7 +12,7 @@ use userhandling::UserHandler;
 use sfml::{
     system::Vector2,
     window::{Key, Event, Style},
-    graphics::{View, Texture, RenderWindow, RenderTarget, Color, Sprite, Transformable},
+    graphics::{View, Texture, RenderWindow, RenderTarget, Color},
 };
 
 
@@ -44,10 +44,11 @@ fn main() {
 
     let mut resources = Resources::new();
     resources.textures.insert("idle_0".to_string(), Texture::from_file("res/player_animations/idle/idle_0.png").unwrap());
-    
-    let test_anim: &Animation = Animation::new(&mut resources, "res/player_animations/idle".to_string(), &[7, 7, 40]);
-    let texture = test_anim.frames[&"idle_0".to_string()].clone();
 
+    let _ = Animation::new(&mut resources, "res/player_animations/idle".to_string(), &[7, 7, 40]);
+    let mut anim_c = AnimController::new(&resources, &["idle".to_string()]);
+    anim_c.set_action("idle".to_string());
+    
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
     user_handler.create_users(vec![("modprog".to_string(), "vips".to_string())]);
 
@@ -70,7 +71,11 @@ fn main() {
 
         // OpenGL drawing commands go here...
         user_handler.update();
+        anim_c.update();
         user_handler.render(&mut window);
+
+        let frame = anim_c.get_frame();
+        window.draw(&frame);
 
         // End the current frame and display its contents on screen
         window.display();

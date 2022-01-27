@@ -1,7 +1,7 @@
 use sfml::{
 	SfBox,
 	system::Vector2f,
-	graphics::{RenderWindow, RenderTarget, Sprite, Transformable, Font},
+	graphics::{RenderWindow, Transformable, Font},
 };
 use crate::{ai::{AI, UserState}, config::Config, resources::Resources};
 use std::{collections::HashMap};

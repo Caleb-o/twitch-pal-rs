@@ -1,4 +1,4 @@
-use serde_json::{self, Value, json};
+use serde_json::{self, Value};
 use std::{fs, collections::HashSet};
 
 const CONFIG_PATH: &str = "data/config.json";
