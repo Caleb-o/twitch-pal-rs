@@ -23,8 +23,8 @@ The event handler does not need to exist in the scene, it can live within the mo
     * [ ] Cosmetics - eg. Random hats
     * [ ] Follower/Tier based cosmetics
     * [ ] Custom sprite sheets
-* [ ] Animation + Animation Controller | Depends on Resource manager
-    * [ ] Load all frames of animation and save to Animation + Resource Manager
+* [x] Animation + Animation Controller | Depends on Resource manager
+    * [x] Load all frames of animation and save to Animation + Resource Manager
         * Note: If animation exists, we pass a reference instead of creating a new one
         *       Tinting may need to occur per draw call, instead of when an anim is loaded
 * [ ] Restrict chat messages to a specific bounds, so it isn't just a long line.

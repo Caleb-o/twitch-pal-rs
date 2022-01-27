@@ -9,3 +9,4 @@ edition = "2021"
 sfml = "0.16.0"
 serde_json = "1.0.78"
 rand = "0.8.4"
+tokio = { version = "1.15.0", features = ["full"] }

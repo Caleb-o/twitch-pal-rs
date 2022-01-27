@@ -1,23 +1,22 @@
 mod ai;
+mod animations;
+mod config;
+mod monitor;
 mod resources;
 mod userhandling;
-mod config;
-mod animations;
 
-use animations::Animation;
-use config::Config;
-use resources::Resources;
-use userhandling::UserHandler;
-
-use sfml::{
-    system::Vector2,
-    window::{Key, Event, Style},
-    graphics::{View, Texture, RenderWindow, RenderTarget, Color},
+use crate::{
+    animations::Animation, config::Config, resources::Resources, userhandling::UserHandler,
 };
 
+use monitor::Monitor;
+use sfml::{
+    graphics::{Color, RenderTarget, RenderWindow, View},
+    system::Vector2,
+    window::{Event, Key, Style},
+};
 
 const WINDOW_SCALE: u32 = 2;
-
 
 fn main() {
     let cfg = Config::new();
@@ -27,15 +26,14 @@ fn main() {
     let display_size = (window_size.0 / WINDOW_SCALE, window_size.1 / WINDOW_SCALE);
 
     let view = View::new(
-        Vector2::new(display_size.0 as f32 / WINDOW_SCALE as f32, display_size.1 as f32 / WINDOW_SCALE as f32),
-        Vector2::new(display_size.0 as f32, display_size.1 as f32)
+        Vector2::new(
+            display_size.0 as f32 / WINDOW_SCALE as f32,
+            display_size.1 as f32 / WINDOW_SCALE as f32,
+        ),
+        Vector2::new(display_size.0 as f32, display_size.1 as f32),
     );
 
-    let mut window = RenderWindow::new(window_size,
-        "SFML Test",
-        Style::CLOSE,
-        &Default::default()
-    );
+    let mut window = RenderWindow::new(window_size, "SFML Test", Style::CLOSE, &Default::default());
 
     window.set_view(&view);
 
@@ -44,12 +42,19 @@ fn main() {
 
     let mut resources = Resources::new();
 
-    let _ = Animation::new(&mut resources, "res/player_animations/idle".to_string(), &[7, 7, 40]);
-    let _ = Animation::new(&mut resources, "res/player_animations/run".to_string(), &[7, 7]);
+    let _ = Animation::new(
+        &mut resources,
+        "res/player_animations/idle".to_string(),
+        &[7, 7, 40],
+    );
+    let _ = Animation::new(
+        &mut resources,
+        "res/player_animations/run".to_string(),
+        &[7, 7],
+    );
 
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
     user_handler.create_users(vec![("modprog".to_string(), "vips".to_string())]);
-
 
     // The main loop - ends as soon as the window is closed
     while window.is_open() {
@@ -58,7 +63,12 @@ fn main() {
             // Request closing for the window
             match event {
                 // TODO: Add quit for viewer_monitor
-                Event::Closed | Event::KeyPressed { code: Key::ESCAPE, .. } => window.close(),
+                Event::Closed
+                | Event::KeyPressed {
+                    code: Key::ESCAPE, ..
+                } => {
+                    window.close();
+                }
                 _ => {}
             }
         }
