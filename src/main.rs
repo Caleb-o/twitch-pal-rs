@@ -4,7 +4,7 @@ mod userhandling;
 mod config;
 mod animations;
 
-use animations::{Animation, AnimController};
+use animations::Animation;
 use config::Config;
 use resources::Resources;
 use userhandling::UserHandler;
@@ -43,12 +43,10 @@ fn main() {
     window.set_framerate_limit(30);
 
     let mut resources = Resources::new();
-    resources.textures.insert("idle_0".to_string(), Texture::from_file("res/player_animations/idle/idle_0.png").unwrap());
 
     let _ = Animation::new(&mut resources, "res/player_animations/idle".to_string(), &[7, 7, 40]);
-    let mut anim_c = AnimController::new(&resources, &["idle".to_string()]);
-    anim_c.set_action("idle".to_string());
-    
+    let _ = Animation::new(&mut resources, "res/player_animations/run".to_string(), &[7, 7]);
+
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
     user_handler.create_users(vec![("modprog".to_string(), "vips".to_string())]);
 
@@ -71,11 +69,7 @@ fn main() {
 
         // OpenGL drawing commands go here...
         user_handler.update();
-        anim_c.update();
         user_handler.render(&mut window);
-
-        let frame = anim_c.get_frame();
-        window.draw(&frame);
 
         // End the current frame and display its contents on screen
         window.display();

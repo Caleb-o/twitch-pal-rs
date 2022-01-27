@@ -1,7 +1,9 @@
 use sfml::{
 	system::Vector2f,
-	graphics::{RenderWindow, RenderTarget, Texture, Sprite, Transformable},
+	graphics::{RenderWindow, RenderTarget, Transformable},
 };
+
+use crate::{animations::AnimController, resources::Resources};
 
 const MOVE_SPEED: f32 = 2.0;
 
@@ -16,8 +18,9 @@ pub struct AI<'a> {
 	pub role: String,
 	pub state: UserState,
 	pub position: Vector2f, // TODO: Remove this and just use sprite's position
+	anim_controller: AnimController<'a>,
 	destination: Vector2f,
-	sprite: Sprite<'a>,
+	flipped: bool,
 }
 
 // Get distance between two points
@@ -26,20 +29,26 @@ fn dist(pos_a: &Vector2f, pos_b: &Vector2f) -> f32 {
 }
 
 impl<'a> AI<'a> {
-	pub fn new(name: &str, role: &str, position: Vector2f, destination: Vector2f, texture: &'a Texture) -> Self {
-		let mut sprite = Sprite::with_texture(texture);
-		sprite.set_position(position);
-
-		Self { name: String::from(name), role: String::from(role), position, destination, sprite, state: UserState::Active }
+	pub fn new(resources: &'a Resources, name: &str, role: &str, position: Vector2f, destination: Vector2f) -> Self {
+		Self { 
+			name: String::from(name), 
+			role: String::from(role), 
+			position, 
+			anim_controller: AnimController::new(resources, "run".to_string(), &["idle".to_string(), "run".to_string()]),
+			destination,
+			state: UserState::Active,
+			flipped: false, // true = Left | false = Right
+		}
 	}
 
 	pub fn say(&mut self, message: String) {
-		assert!(false, "TODO: Unimplemented function");
+		panic!("TODO: Unimplemented function");
 	}
 
 	pub fn move_to(&mut self, destination: Vector2f) {
-		 self.destination = destination;
-		 // TODO: Call to animation handler to change action and set flipped flag (if required)
+		self.destination = destination;
+		self.anim_controller.set_action("run".to_string());
+		self.flipped = if destination.x < self.position.x { true } else { false };
 	}
 
 	pub fn move_to_leave(&mut self, destination: Vector2f) {
@@ -48,13 +57,14 @@ impl<'a> AI<'a> {
    }
 
 	pub fn update(&mut self) {
+		self.anim_controller.update();
+		
 		// Check if we have a destination set
 		if self.position != self.destination {
 			self.position.x += if self.position.x < self.destination.x { MOVE_SPEED } else { -MOVE_SPEED };
-			self.sprite.set_position(self.position);
 
 			if dist(&self.position, &self.destination) <= MOVE_SPEED {
-				// TODO: Set anim to idle
+				self.anim_controller.set_action("idle".to_string());
 				self.position.x = self.destination.x;
 
 				// Set can_remove to leaving
@@ -67,6 +77,10 @@ impl<'a> AI<'a> {
 	}
 
 	pub fn render(&self, target: &mut RenderWindow) {
-		target.draw(&self.sprite);
+		// TODO: flip sprite based on flipped flag in AI
+		let mut sprite = self.anim_controller.get_frame();
+		sprite.set_position(self.position);
+		sprite.scale(Vector2f::new(if self.flipped { -1. } else { 1. }, 1.));
+		target.draw(&sprite);
 	}
 }

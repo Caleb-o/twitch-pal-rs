@@ -1,7 +1,7 @@
 use sfml::{
 	SfBox,
 	system::Vector2f,
-	graphics::{RenderWindow, Transformable, Font},
+	graphics::{RenderWindow, Font},
 };
 use crate::{ai::{AI, UserState}, config::Config, resources::Resources};
 use std::{collections::HashMap};
@@ -32,10 +32,10 @@ impl<'a> UserHandler<'a> {
 				let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 { -(USER_START_POS as i32) } else { USER_START_POS as i32 };
 				let goto_x: u32 = self.rng.gen_range(USER_BOUNDS..self.display.0 - USER_BOUNDS);
 				self.users.insert(user.clone(), AI::new(
+					self.resources,
 					&user, &role,
 					Vector2f::new(start_x as f32, self.display.1 as f32 - 13.0),
 					Vector2f::new(goto_x as f32, self.display.1 as f32 - 13.0),
-					self.resources.textures.get("idle_0").unwrap()
 				));
 			}
 		}
@@ -72,7 +72,7 @@ impl<'a> UserHandler<'a> {
 			u.update();
 
 			// Move the user randomly, between the window bounds with padding
-			if u.state != UserState::Leaving && self.rng.gen_range(0_u32..500_000) < 30 {
+			if u.state != UserState::Leaving && self.rng.gen_range(0_u32..10_000) < 100 {
 				let pos = Vector2f::new(self.rng.gen_range(USER_BOUNDS..self.display.0 - USER_BOUNDS) as f32, u.position.y);
 				u.move_to(pos);
 			}

@@ -8,9 +8,9 @@ pub struct Animation {
 }
 
 pub struct AnimController<'a> {
-	pub currentFrame: u32,
-	pub frameCounter: u32,
-	pub currentAnim: String,
+	pub current_frame: u32,
+	pub frame_counter: u32,
+	pub current_anim: String,
 	pub animations: HashMap<String, &'a Animation>,
 }
 
@@ -46,33 +46,33 @@ impl Animation {
 }
 
 impl<'a> AnimController<'a> {
-	pub fn new(resources: &'a Resources, anims_to_use: &[String]) -> AnimController<'a> {
+	pub fn new(resources: &'a Resources, default_state: String, anims_to_use: &[String]) -> AnimController<'a> {
 		let animations: HashMap<String, &'a Animation> = anims_to_use.into_iter().map(|name| (name.clone(), resources.animations.get(name).unwrap())).collect();
-		AnimController { currentFrame: 0, frameCounter: 0, currentAnim: "None".to_string(), animations }
+		AnimController { current_frame: 0, frame_counter: 0, current_anim: default_state, animations }
 	}
 
 	pub fn set_action(&mut self, action_name: String) {
-		if self.currentAnim != action_name {
-			self.currentAnim = action_name;
-			self.currentFrame = 0;
-			self.frameCounter = 0;
+		if self.current_anim != action_name {
+			self.current_anim = action_name;
+			self.current_frame = 0;
+			self.frame_counter = 0;
 		}
 	}
 
 	pub fn update(&mut self) {
-		self.frameCounter += 1;
+		self.frame_counter += 1;
 
-		if self.frameCounter >= self.animations[&self.currentAnim].metadata[self.currentFrame as usize].1 {
-			self.currentFrame += 1;
-			self.frameCounter = 0;
+		if self.frame_counter >= self.animations[&self.current_anim].metadata[self.current_frame as usize].1 {
+			self.current_frame += 1;
+			self.frame_counter = 0;
 		}
 
-		if self.currentFrame as usize >= self.animations[&self.currentAnim].metadata.len() {
-			self.currentFrame = 0;
+		if self.current_frame as usize >= self.animations[&self.current_anim].metadata.len() {
+			self.current_frame = 0;
 		}
 	}
 
 	pub fn get_frame(&self) -> Sprite {
-		Sprite::with_texture(&self.animations[&self.currentAnim].frames[self.currentFrame as usize])
+		Sprite::with_texture(&self.animations[&self.current_anim].frames[self.current_frame as usize])
 	}
 }
