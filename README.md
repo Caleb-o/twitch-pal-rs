@@ -14,11 +14,19 @@ How do we know about an event type?
 The event handler does not need to exist in the scene, it can live within the monitor since it tracks the data required. The monitor also contains the user_handler, so we do not (or at least should not) need to cache it within the event system. 
 
 
+## Modifications / Fixes
+* [ ] Convert some Strings to &str (where applicable)
+
+
 ## Potential Features / TODO
 * [ ] Sprites
     * [ ] Cosmetics - eg. Random hats
     * [ ] Follower/Tier based cosmetics
     * [ ] Custom sprite sheets
+* [ ] Animation + Animation Controller | Depends on Resource manager
+    * [ ] Load all frames of animation and save to Animation + Resource Manager
+        * Note: If animation exists, we pass a reference instead of creating a new one
+        *       Tinting may need to occur per draw call, instead of when an anim is loaded
 * [ ] Restrict chat messages to a specific bounds, so it isn't just a long line.
     * Issue: Newlines are not considered, even when we add them in
     * Note: Maybe parse the message and insert a newline every Nth word
