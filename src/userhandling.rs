@@ -52,6 +52,7 @@ impl<'a> UserHandler<'a> {
                         self.resources,
                         &user,
                         &role,
+                        &self.font,
                         Vector2f::new(start_x as f32, self.display.1 as f32 - 13.0),
                         Vector2f::new(goto_x as f32, self.display.1 as f32 - 13.0),
                     ),

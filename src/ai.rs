@@ -1,10 +1,12 @@
 use crate::{animations::AnimController, resources::Resources};
 use sfml::{
-    graphics::{RenderTarget, RenderWindow, Transformable},
+    SfBox,
+    graphics::{RenderTexture, Text, Color, Font, Sprite, RenderTarget, RenderWindow, Transformable},
     system::Vector2f,
 };
 
 const MOVE_SPEED: f32 = 2.0;
+const FONT_SIZE: u32 = 8;
 
 #[derive(PartialEq, Eq)]
 pub enum UserState {
@@ -15,9 +17,10 @@ pub enum UserState {
 
 pub struct AI<'a> {
     pub name: String,
-    pub role: String,
+    pub role: String, // TODO: Convert this to an enum, so save some time
     pub state: UserState,
-    pub position: Vector2f, // TODO: Remove this and just use sprite's position
+    pub position: Vector2f, // TODO: Remove this and just use sprite's position (Must use a Sprite, return Texture from anim controller)
+    nameplate: RenderTexture,
     anim_controller: AnimController<'a>,
     destination: Vector2f,
     flipped: bool,
@@ -33,9 +36,18 @@ impl<'a> AI<'a> {
         resources: &'a Resources,
         name: &str,
         role: &str,
+        font: &SfBox<Font>,
         position: Vector2f,
         destination: Vector2f,
     ) -> Self {
+        // TODO: Find a better way to get text centered
+        let mut nameplate = RenderTexture::new((name.len() * (FONT_SIZE as f32 * 0.75) as usize) as u32, (FONT_SIZE as f32 * 1.75) as u32, false).unwrap();
+        nameplate.clear(Color::BLACK);
+        let mut txt = Text::new(&name.to_string(), font, FONT_SIZE);
+        txt.set_position(Vector2f::new(FONT_SIZE as f32 / 2., FONT_SIZE as f32 * 0.25));
+        nameplate.draw(&txt);
+
+
         Self {
             name: String::from(name),
             role: String::from(role),
@@ -45,6 +57,7 @@ impl<'a> AI<'a> {
                 "run".to_string(),
                 &["idle".to_string(), "run".to_string()],
             ),
+            nameplate,
             destination,
             state: UserState::Active,
             flipped: false, // true = Left | false = Right
@@ -86,7 +99,6 @@ impl<'a> AI<'a> {
                 self.position.x = self.destination.x;
 
                 // Set can_remove to leaving
-                // TODO: Monitor this because it may become awkward and reset when we don't want to
                 if self.state == UserState::Leaving {
                     self.state = UserState::Removable;
                 }
@@ -95,10 +107,21 @@ impl<'a> AI<'a> {
     }
 
     pub fn render(&self, target: &mut RenderWindow) {
-        // TODO: flip sprite based on flipped flag in AI
+        // TODO: Make this less trash
         let mut sprite = self.anim_controller.get_frame();
-        sprite.set_position(self.position);
+        let size = sprite.texture().unwrap().size();
+        sprite.set_origin(Vector2f::new((size.x / 2) as f32, 0.));
         sprite.scale(Vector2f::new(if self.flipped { -1. } else { 1. }, 1.));
+        sprite.set_position(self.position);
+        
+        let mut nameplate = Sprite::with_texture(self.nameplate.texture());
+        nameplate.scale(Vector2f::new(1., -1.)); // This inverts the Y because it renders unpside down
+
+        let name_size = self.nameplate.texture().size();
+        nameplate.set_origin(Vector2f::new((name_size.x / 2) as f32, 0.));
+        nameplate.set_position(self.position);
+        
         target.draw(&sprite);
+        target.draw(&nameplate);
     }
 }
