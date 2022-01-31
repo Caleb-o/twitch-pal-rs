@@ -54,9 +54,7 @@ fn main() {
     );
 
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
-    user_handler.create_users(vec![("modprog".to_string(), "vips".to_string())]);
-
-    let mut monitor = Monitor::new(&mut user_handler);
+    let mut monitor = Monitor::new(&cfg, &mut user_handler);
     monitor.start(cfg.settings["CHANNEL"].as_str().unwrap().to_string());
 
     // The main loop - ends as soon as the window is closed

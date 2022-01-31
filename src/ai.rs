@@ -52,7 +52,7 @@ impl<'a> AI<'a> {
     }
 
     pub fn say(&mut self, message: String) {
-        panic!("TODO: Unimplemented function");
+        println!("{}: {message}", self.name);
     }
 
     pub fn move_to(&mut self, destination: Vector2f) {

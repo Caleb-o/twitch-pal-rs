@@ -1,31 +1,38 @@
 use std::{
-    io::Read,
+    fs,
+    io::{Read, BufRead},
     sync::mpsc::{self, Receiver, Sender},
     thread,
     time::Duration,
 };
 use reqwest;
+use serde_json::{self, Value};
 use sfml::graphics::RenderWindow;
 
-use crate::userhandling::UserHandler;
+use crate::{config::Config, userhandling::UserHandler};
 
 
 pub struct Monitor<'a> {
+    cfg: &'a Config,
     handler: &'a mut UserHandler<'a>,
     tx: Sender<String>,
     rx: Receiver<String>,
     extx: Option<Sender<()>>,
+    blacklist: Vec<String>,
 }
 
 impl<'a> Monitor<'a> {
-    pub fn new(handler: &'a mut UserHandler<'a>) -> Monitor<'a> {
+    pub fn new(cfg: &'a Config, handler: &'a mut UserHandler<'a>) -> Monitor<'a> {
         let (tx, rx) = mpsc::channel();
+        let blacklist: Vec<String> = fs::read_to_string("res/blacklist.txt").unwrap().lines().map(|s| s.to_string()).collect();
 
         Monitor {
+            cfg,
             handler,
             tx,
             rx,
             extx: None,
+            blacklist
         }
     }
 
@@ -67,8 +74,26 @@ impl<'a> Monitor<'a> {
 
         // If ok, we should receive the new chatters list in string format
         if let Ok(resp) = self.rx.try_recv() {
-            // TODO: Deserialize the JSON and pass relevant data to user handler
-            // println!("Response :: '{resp}'");
+            // Setup for building the vec of users
+            let json_resp: Value = serde_json::from_str(&resp).unwrap();
+            let mut current_chatters: Vec<(String, String)> = Vec::new();
+            let capture_list = self.cfg.settings["CAPTURE"].as_array().unwrap();
+            
+            // Capture all users within the specified capture list, filtering out the blacklist also
+            for role in capture_list {
+                let mut other: Vec<(String, String)> = json_resp["chatters"][&role.as_str().unwrap()]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|name| (name.as_str().unwrap().to_string(), role.as_str().unwrap().to_string()))
+                    .filter(|(n, _)| !self.blacklist.contains(n))
+                    .collect();
+
+                current_chatters.append(&mut other);
+            }
+
+            self.handler.create_users(&current_chatters);
+            self.handler.remove_departed(current_chatters.into_iter().map(|(n, _)| n).collect());
         }
     }
 

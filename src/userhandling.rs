@@ -35,9 +35,9 @@ impl<'a> UserHandler<'a> {
         }
     }
 
-    pub fn create_users(&mut self, new_chatters: Vec<(String, String)>) {
+    pub fn create_users(&mut self, new_chatters: &Vec<(String, String)>) {
         for (user, role) in new_chatters {
-            if !self.users.contains_key(&user) {
+            if !self.users.contains_key(user) {
                 let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 {
                     -(USER_START_POS as i32)
                 } else {
@@ -60,8 +60,8 @@ impl<'a> UserHandler<'a> {
         }
     }
 
-    fn trigger_leave_on(&mut self, name: String) {
-        let user = self.users.get_mut(&name).unwrap();
+    fn trigger_leave_on(&mut self, name: &String) {
+        let user = self.users.get_mut(name).unwrap();
         user.move_to_leave(Vector2f::new(-30.0, user.position.y));
     }
 
@@ -70,8 +70,12 @@ impl<'a> UserHandler<'a> {
     }
 
     pub fn remove_departed(&mut self, user_list: Vec<String>) {
-        for user_name in user_list {
-            if self.users.contains_key(&user_name) || self.cfg.requests.contains(&user_name) {
+        // Bruh
+        let keys: Vec<String> = self.users.keys().map(|s| s.clone()).collect();
+
+        // Iterate over keys, removing and triggering a leave event
+        for user_name in keys {
+            if !user_list.contains(&user_name) || self.cfg.requests.contains(&user_name) {
                 match self.users[&user_name].state {
                     UserState::Removable => {
                         let _ = self.users.remove(&user_name);
@@ -81,7 +85,7 @@ impl<'a> UserHandler<'a> {
                             .get_mut(&user_name)
                             .unwrap()
                             .say("Goodbye".to_string());
-                        self.trigger_leave_on(user_name);
+                        self.trigger_leave_on(&user_name);
                     }
                     _ => {}
                 }
