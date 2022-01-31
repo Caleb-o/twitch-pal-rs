@@ -53,6 +53,11 @@ fn main() {
         &[7, 7],
     );
 
+    // NOTE: We will need a helper function to create colours from json array, for the colour palette
+    let raw_col: Vec<u8> = cfg.settings["BG_COL"].as_array().unwrap().iter().map(|s| s.as_f64().unwrap() as u8).collect();
+    let background_col = Color::rgb(raw_col[0], raw_col[1], raw_col[2]);
+
+
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
     let mut monitor = Monitor::new(&cfg, &mut user_handler);
     monitor.start(cfg.settings["CHANNEL"].as_str().unwrap().to_string());
@@ -63,7 +68,6 @@ fn main() {
         while let Some(event) = window.poll_event() {
             // Request closing for the window
             match event {
-                // TODO: Add quit for viewer_monitor
                 Event::Closed
                 | Event::KeyPressed {
                     code: Key::ESCAPE, ..
@@ -76,7 +80,7 @@ fn main() {
 
         // Activate the window for OpenGL rendering
         window.set_active(true);
-        window.clear(Color::BLACK);
+        window.clear(background_col);
 
         // OpenGL drawing commands go here...
         monitor.run();

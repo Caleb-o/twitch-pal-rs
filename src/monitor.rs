@@ -1,6 +1,6 @@
 use std::{
     fs,
-    io::{Read, BufRead},
+    io::Read,
     sync::mpsc::{self, Receiver, Sender},
     thread,
     time::Duration,

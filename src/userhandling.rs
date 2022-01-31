@@ -12,7 +12,7 @@ use sfml::{
 use std::collections::HashMap;
 
 const USER_BOUNDS: u32 = 20;
-const USER_START_POS: u32 = 30;
+const USER_START_POS: u32 = 50;
 
 pub struct UserHandler<'a> {
     cfg: &'a Config,
@@ -41,7 +41,7 @@ impl<'a> UserHandler<'a> {
                 let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 {
                     -(USER_START_POS as i32)
                 } else {
-                    USER_START_POS as i32
+                    self.display.0 as i32 + USER_START_POS as i32
                 };
                 let goto_x: u32 = self
                     .rng
@@ -65,7 +65,7 @@ impl<'a> UserHandler<'a> {
         user.move_to_leave(Vector2f::new(-30.0, user.position.y));
     }
 
-    pub fn say(&mut self, user_name: String, message: String) {
+    pub fn _say(&mut self, user_name: String, message: String) {
         self.users.get_mut(&user_name).unwrap().say(message);
     }
 
