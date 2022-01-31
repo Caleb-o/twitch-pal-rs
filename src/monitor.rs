@@ -94,6 +94,9 @@ impl<'a> Monitor<'a> {
                 current_chatters.append(&mut other);
             }
 
+
+            // TODO: Think about using a single function, since we use the name to remove users
+            // Handle user creation and removal
             self.handler.create_users(&current_chatters);
             self.handler.remove_departed(current_chatters.into_iter().map(|(n, _)| n).collect());
         }

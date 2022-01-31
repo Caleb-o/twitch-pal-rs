@@ -107,7 +107,7 @@ impl<'a> UserHandler<'a> {
             u.update();
 
             // Move the user randomly, between the window bounds with padding
-            if u.state != UserState::Leaving && self.rng.gen_range(0_u32..10_000) < 100 {
+            if u.state != UserState::Leaving && self.rng.gen_range(0_u32..50_000) < 200 {
                 let pos = Vector2f::new(
                     self.rng
                         .gen_range(USER_BOUNDS..self.display.0 - USER_BOUNDS)

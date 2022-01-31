@@ -25,22 +25,20 @@ The event handler does not need to exist in the scene, it can live within the mo
     * [ ] Custom sprite sheets
 * [x] Animation + Animation Controller | Depends on Resource manager
     * [x] Load all frames of animation and save to Animation + Resource Manager
-        * Note: If animation exists, we pass a reference instead of creating a new one
-        *       Tinting may need to occur per draw call, instead of when an anim is loaded
-* [ ] Restrict chat messages to a specific bounds, so it isn't just a long line.
-    * Issue: Newlines are not considered, even when we add them in
-    * Note: Maybe parse the message and insert a newline every Nth word
+* [x] Cache user's status (eg. Mod/VIP)
 * [ ] Socket to get twitch messages, show them above their avatar (like Stream Avatars)
     - Requires OAUTH token
-* [ ] Cache user's status (eg. Mod/VIP)
-* [ ] Chat to interact with the avatars
-    * [ ] Commands
-        * [ ] add/remove avatar
-        * [ ] (Mod/Broadcaster) Reset avatars, remove all and respawn
-    * [ ] Messages
-        * [ ] Filter messages for bad words (customise these words in config)
-            - Note: Not sure if automod will capture this, we might still receive it
-        * [ ] Display chat message above their avatar
+    * [ ] Restrict chat messages to a specific bounds, so it isn't just a long line.
+        * Issue: Newlines are not considered, even when we add them in
+        * Note: Maybe parse the message and insert a newline every Nth word
+    * [ ] Chat to interact with the avatars
+        * [ ] Commands
+            * [ ] add/remove avatar
+            * [ ] (Mod/Broadcaster) Reset avatars, remove all and respawn
+        * [ ] Messages
+            * [ ] Filter messages for bad words (customise these words in config)
+                - Note: Not sure if automod will capture this, we might still receive it
+            * [ ] Display chat message above their avatar
 * [ ] Random events / occurances that changes state in some way
     * [ ] Polls interact with avatars, people who have voted stay in a section of the screen. (Maybe draw text in the screen sections to show the choice)
     * [ ] Channel events cause special FX (eg. fireworks when a raid occurs, maybe all the raiders run in from the side)

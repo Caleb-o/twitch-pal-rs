@@ -65,23 +65,19 @@ impl<'a> AI<'a> {
             nameplate,
             destination,
             state: UserState::Active,
-            flipped: false, // true = Left | false = Right
+            flipped: destination.x < position.x, // true = Left | false = Right
             colour,
         }
     }
 
-    pub fn say(&mut self, message: String) {
-        //println!("{}: {message}", self.name);
+    pub fn say(&mut self, _message: String) {
+        // TODO: Draw chat bubble above user's heads
     }
 
     pub fn move_to(&mut self, destination: Vector2f) {
         self.destination = destination;
         self.anim_controller.set_action("run".to_string());
-        self.flipped = if destination.x < self.position.x {
-            true
-        } else {
-            false
-        };
+        self.flipped = destination.x < self.position.x;
     }
 
     pub fn move_to_leave(&mut self, destination: Vector2f) {
@@ -120,8 +116,8 @@ impl<'a> AI<'a> {
         sprite.scale(Vector2f::new(if self.flipped { -1. } else { 1. }, 1.));
         sprite.set_position(self.position);
         sprite.set_color(self.colour);
-
         
+        // Create a sprite with the nameplate and set its properties
         let mut nameplate = Sprite::with_texture(self.nameplate.texture());
         nameplate.scale(Vector2f::new(1., -1.)); // This inverts the Y because it renders unpside down
 
