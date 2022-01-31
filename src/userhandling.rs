@@ -1,4 +1,5 @@
 use crate::{
+    utils,
     role::RoleType,
     ai::{UserState, AI},
     config::Config,
@@ -37,6 +38,8 @@ impl<'a> UserHandler<'a> {
     }
 
     pub fn create_users(&mut self, new_chatters: &Vec<(String, RoleType)>) {
+        let colours = self.cfg.settings["COLOUR_PALETTE"].as_array().unwrap();
+
         for (user, role) in new_chatters {
             if !self.users.contains_key(user) {
                 let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 {
@@ -47,6 +50,9 @@ impl<'a> UserHandler<'a> {
                 let goto_x: u32 = self
                     .rng
                     .gen_range(USER_BOUNDS..self.display.0 - USER_BOUNDS);
+
+                let colour = utils::colour_from_json(&colours[self.rng.gen_range(0_usize..colours.len())]);
+
                 self.users.insert(
                     user.clone(),
                     AI::new(
@@ -54,6 +60,7 @@ impl<'a> UserHandler<'a> {
                         &user,
                         *role,
                         &self.font,
+                        colour,
                         Vector2f::new(start_x as f32, self.display.1 as f32 - 13.0),
                         Vector2f::new(goto_x as f32, self.display.1 as f32 - 13.0),
                     ),

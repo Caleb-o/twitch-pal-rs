@@ -24,6 +24,7 @@ pub struct AI<'a> {
     anim_controller: AnimController<'a>,
     destination: Vector2f,
     flipped: bool,
+    colour: Color,
 }
 
 // Get distance between two points
@@ -37,14 +38,17 @@ impl<'a> AI<'a> {
         name: &str,
         role: role::RoleType,
         font: &SfBox<Font>,
+        colour: Color,
         position: Vector2f,
         destination: Vector2f,
     ) -> Self {
         // TODO: Find a better way to get text centered
         let mut nameplate = RenderTexture::new((name.len() * (FONT_SIZE as f32 * 0.75) as usize) as u32, (FONT_SIZE as f32 * 1.75) as u32, false).unwrap();
         nameplate.clear(Color::BLACK);
+        let role_colour = role::get_colour(role);
+
         let mut txt = Text::new(&name.to_string(), font, FONT_SIZE);
-        txt.set_fill_color(role::get_colour(role));
+        txt.set_fill_color(role_colour);
         txt.set_position(Vector2f::new(FONT_SIZE as f32 / 2., FONT_SIZE as f32 * 0.25));
         nameplate.draw(&txt);
 
@@ -62,11 +66,12 @@ impl<'a> AI<'a> {
             destination,
             state: UserState::Active,
             flipped: false, // true = Left | false = Right
+            colour,
         }
     }
 
     pub fn say(&mut self, message: String) {
-        println!("{}: {message}", self.name);
+        //println!("{}: {message}", self.name);
     }
 
     pub fn move_to(&mut self, destination: Vector2f) {
@@ -114,6 +119,8 @@ impl<'a> AI<'a> {
         sprite.set_origin(Vector2f::new((size.x / 2) as f32, 0.));
         sprite.scale(Vector2f::new(if self.flipped { -1. } else { 1. }, 1.));
         sprite.set_position(self.position);
+        sprite.set_color(self.colour);
+
         
         let mut nameplate = Sprite::with_texture(self.nameplate.texture());
         nameplate.scale(Vector2f::new(1., -1.)); // This inverts the Y because it renders unpside down

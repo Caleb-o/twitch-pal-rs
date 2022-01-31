@@ -5,6 +5,7 @@ mod monitor;
 mod resources;
 mod userhandling;
 mod role;
+mod utils;
 
 use crate::{
     animations::Animation, config::Config, resources::Resources, userhandling::UserHandler,
@@ -12,7 +13,7 @@ use crate::{
 
 use monitor::Monitor;
 use sfml::{
-    graphics::{Color, RenderTarget, RenderWindow, View},
+    graphics::{RenderTarget, RenderWindow, View},
     system::Vector2,
     window::{Event, Key, Style},
 };
@@ -54,10 +55,7 @@ fn main() {
         &[7, 7],
     );
 
-    // NOTE: We will need a helper function to create colours from json array, for the colour palette
-    let raw_col: Vec<u8> = cfg.settings["BG_COL"].as_array().unwrap().iter().map(|s| s.as_f64().unwrap() as u8).collect();
-    let background_col = Color::rgb(raw_col[0], raw_col[1], raw_col[2]);
-
+    let background_col = utils::colour_from_cfg(&cfg, "BG_COL");
 
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
     let mut monitor = Monitor::new(&cfg, &mut user_handler);
