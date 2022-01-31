@@ -8,7 +8,7 @@ mod role;
 mod utils;
 
 use crate::{
-    animations::Animation, config::Config, resources::Resources, userhandling::UserHandler,
+    animations::Animation, config::Config, resources::Resources, userhandling::UserHandler
 };
 
 use monitor::Monitor;

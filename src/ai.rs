@@ -47,11 +47,16 @@ impl<'a> AI<'a> {
         nameplate.clear(Color::BLACK);
         let role_colour = role::get_colour(role);
 
+        // NOTE: We could not set origin on the text, as it would corrupt the text? Strange rendering on most names
+        //       Unicode does not seem to work, it may be a font issue or how text is rendered with SFML's builtin method
+        //       https://github.com/SFML/SFML/issues/1536
+        //? We could test fonts for characters, swapping to the correct font or find a font that supports multiple languages
+        //? FontForge would allow for merging multiple fonts, we would have to manually merge fonts from different languages
+        //? We can use fonts from the same family here: https://fonts.google.com/noto/fonts
         let mut txt = Text::new(&name.to_string(), font, FONT_SIZE);
         txt.set_fill_color(role_colour);
         txt.set_position(Vector2f::new(FONT_SIZE as f32 / 2., FONT_SIZE as f32 * 0.25));
         nameplate.draw(&txt);
-
 
         Self {
             name: String::from(name),

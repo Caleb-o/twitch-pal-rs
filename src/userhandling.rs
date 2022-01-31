@@ -30,7 +30,7 @@ impl<'a> UserHandler<'a> {
         Self {
             cfg,
             display,
-            font: Font::from_file("res/fonts/lucon.ttf").unwrap(),
+            font: Font::from_file("res/fonts/Hack.ttf").unwrap(),
             users: HashMap::new(),
             resources,
             rng: rand::thread_rng(),
