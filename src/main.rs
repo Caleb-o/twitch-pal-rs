@@ -4,6 +4,7 @@ mod config;
 mod monitor;
 mod resources;
 mod userhandling;
+mod role;
 
 use crate::{
     animations::Animation, config::Config, resources::Resources, userhandling::UserHandler,

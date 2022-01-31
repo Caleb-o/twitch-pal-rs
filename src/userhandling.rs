@@ -1,4 +1,5 @@
 use crate::{
+    role::RoleType,
     ai::{UserState, AI},
     config::Config,
     resources::Resources,
@@ -35,7 +36,7 @@ impl<'a> UserHandler<'a> {
         }
     }
 
-    pub fn create_users(&mut self, new_chatters: &Vec<(String, String)>) {
+    pub fn create_users(&mut self, new_chatters: &Vec<(String, RoleType)>) {
         for (user, role) in new_chatters {
             if !self.users.contains_key(user) {
                 let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 {
@@ -51,7 +52,7 @@ impl<'a> UserHandler<'a> {
                     AI::new(
                         self.resources,
                         &user,
-                        &role,
+                        *role,
                         &self.font,
                         Vector2f::new(start_x as f32, self.display.1 as f32 - 13.0),
                         Vector2f::new(goto_x as f32, self.display.1 as f32 - 13.0),

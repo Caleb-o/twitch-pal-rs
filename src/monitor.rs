@@ -9,7 +9,7 @@ use reqwest;
 use serde_json::{self, Value};
 use sfml::graphics::RenderWindow;
 
-use crate::{config::Config, userhandling::UserHandler};
+use crate::{config::Config, userhandling::UserHandler, role};
 
 
 pub struct Monitor<'a> {
@@ -76,16 +76,18 @@ impl<'a> Monitor<'a> {
         if let Ok(resp) = self.rx.try_recv() {
             // Setup for building the vec of users
             let json_resp: Value = serde_json::from_str(&resp).unwrap();
-            let mut current_chatters: Vec<(String, String)> = Vec::new();
+            let mut current_chatters: Vec<(String, role::RoleType)> = Vec::new();
             let capture_list = self.cfg.settings["CAPTURE"].as_array().unwrap();
             
             // Capture all users within the specified capture list, filtering out the blacklist also
             for role in capture_list {
-                let mut other: Vec<(String, String)> = json_resp["chatters"][&role.as_str().unwrap()]
+                let mut other: Vec<(String, role::RoleType)> = json_resp["chatters"][&role.as_str().unwrap()]
                     .as_array()
                     .unwrap()
                     .iter()
-                    .map(|name| (name.as_str().unwrap().to_string(), role.as_str().unwrap().to_string()))
+                    .map(|name| {
+                        (name.as_str().unwrap().to_string(), role::get_roletype(role.as_str().unwrap().to_string()))
+                    })
                     .filter(|(n, _)| !self.blacklist.contains(n))
                     .collect();
 

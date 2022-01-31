@@ -1,4 +1,4 @@
-use crate::{animations::AnimController, resources::Resources};
+use crate::{animations::AnimController, resources::Resources, role};
 use sfml::{
     SfBox,
     graphics::{RenderTexture, Text, Color, Font, Sprite, RenderTarget, RenderWindow, Transformable},
@@ -17,7 +17,7 @@ pub enum UserState {
 
 pub struct AI<'a> {
     pub name: String,
-    pub role: String, // TODO: Convert this to an enum, so save some time
+    pub role: role::RoleType,
     pub state: UserState,
     pub position: Vector2f, // TODO: Remove this and just use sprite's position (Must use a Sprite, return Texture from anim controller)
     nameplate: RenderTexture,
@@ -35,7 +35,7 @@ impl<'a> AI<'a> {
     pub fn new(
         resources: &'a Resources,
         name: &str,
-        role: &str,
+        role: role::RoleType,
         font: &SfBox<Font>,
         position: Vector2f,
         destination: Vector2f,
@@ -44,13 +44,14 @@ impl<'a> AI<'a> {
         let mut nameplate = RenderTexture::new((name.len() * (FONT_SIZE as f32 * 0.75) as usize) as u32, (FONT_SIZE as f32 * 1.75) as u32, false).unwrap();
         nameplate.clear(Color::BLACK);
         let mut txt = Text::new(&name.to_string(), font, FONT_SIZE);
+        txt.set_fill_color(role::get_colour(role));
         txt.set_position(Vector2f::new(FONT_SIZE as f32 / 2., FONT_SIZE as f32 * 0.25));
         nameplate.draw(&txt);
 
 
         Self {
             name: String::from(name),
-            role: String::from(role),
+            role,
             position,
             anim_controller: AnimController::new(
                 resources,
