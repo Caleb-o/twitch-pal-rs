@@ -33,7 +33,7 @@ fn main() {
         Vector2::new(display_size.0 as f32, display_size.1 as f32),
     );
 
-    let mut window = RenderWindow::new(window_size, "SFML Test", Style::CLOSE, &Default::default());
+    let mut window = RenderWindow::new(window_size, "Twitch Pals", Style::CLOSE, &Default::default());
 
     window.set_view(&view);
 
@@ -55,6 +55,9 @@ fn main() {
 
     let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
     user_handler.create_users(vec![("modprog".to_string(), "vips".to_string())]);
+
+    let mut monitor = Monitor::new(&mut user_handler);
+    monitor.start(cfg.settings["CHANNEL"].as_str().unwrap().to_string());
 
     // The main loop - ends as soon as the window is closed
     while window.is_open() {
@@ -78,10 +81,13 @@ fn main() {
         window.clear(Color::BLACK);
 
         // OpenGL drawing commands go here...
-        user_handler.update();
-        user_handler.render(&mut window);
+        monitor.run();
+        monitor.render(&mut window);
 
         // End the current frame and display its contents on screen
         window.display();
     }
+
+    // Handle monitor after we close the window
+    monitor.close();
 }
