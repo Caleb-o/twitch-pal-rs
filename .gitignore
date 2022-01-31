@@ -12,5 +12,6 @@ Cargo.lock
 
 # Added by cargo
 
+**/__pycache__
 /target
 data/

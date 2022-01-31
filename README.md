@@ -1,6 +1,18 @@
 # twitch-pal-rs
 
 
+## Building / Running
+Config (Requires Python3)
+```
+python scripts/config_ui.py
+```
+
+Avatars
+```
+cargo run --release
+```
+
+
 ## Events
 What triggers an event?
 * Channel event eg. raid, donations etc
