@@ -113,16 +113,26 @@ def run_cfg_editor(cfg: config.Config):
             items=cfg_window_sizes,
         )
 
+        cfg.config['FPS'], cfg.config['FPS'] = imgui.slider_int(
+            "FPS", cfg.config['FPS'], 24, 60
+        )
+
+        _, user_limit = imgui.input_text(
+            label='User Limit (0 = uncapped)',
+            value=str(cfg.config['USER_LIMIT']),
+            buffer_length=6,
+            flags=imgui.INPUT_TEXT_CHARS_DECIMAL | imgui.INPUT_TEXT_CHARS_NO_BLANK,
+        )
+
+        if len(user_limit) > 0 and user_limit.isdigit():
+            cfg.config['USER_LIMIT'] = int(user_limit)
+
         _, cfg.config['SHOW_MESSAGES'] = imgui.checkbox(
             label="Show Messages", state=cfg.config['SHOW_MESSAGES']
         )
 
         cfg.config['BG_COL'], cfg.config['BG_COL'] = imgui.color_edit3(
             'Background Colour', *cfg.config['BG_COL'], imgui.COLOR_EDIT_FLOAT
-        )
-
-        cfg.config['FPS'], cfg.config['FPS'] = imgui.slider_int(
-            "FPS", cfg.config['FPS'], 24, 60
         )
 
         show_capture_list, _ = imgui.collapsing_header("Capture List")

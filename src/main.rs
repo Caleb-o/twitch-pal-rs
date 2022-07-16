@@ -40,7 +40,8 @@ fn main() {
     window.set_view(&view);
 
     // Limit the framerate to 30 frames per second (this step is optional, but I like my CPU)
-    window.set_framerate_limit(30);
+    let fps = serde_json::from_slice::<u32>(cfg.settings["FPS"].to_string().as_bytes()).unwrap();
+    window.set_framerate_limit(fps);
 
     let mut resources = Resources::new();
     resources.load_animation(
@@ -61,7 +62,7 @@ fn main() {
         UserHandler::new(cfg.clone(), display_size, resources)
     );
 
-    monitor.start(cfg.settings["CHANNEL"].as_str().unwrap().to_string());
+    monitor.start(cfg.settings["CHANNEL"].as_str().unwrap().to_string().to_lowercase());
 
     // The main loop - ends as soon as the window is closed
     while window.is_open() {

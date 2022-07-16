@@ -10,6 +10,7 @@ const CONFIG_DEFAULT: &str = r#"{
 		"WINDOW_SIZE": [1280, 720],
 		"BG_COL": [40, 40, 40],
 		"FPS": 24,
+        "USER_LIMIT": 0,
 		"SHOW_MESSAGES": true,
 		"CAPTURE": ["broadcaster", "admins", "moderators", "viewers", "vips"],
 		"FILTERED_WORDS": [],

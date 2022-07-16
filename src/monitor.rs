@@ -3,14 +3,14 @@ use std::{
     io::Read,
     sync::mpsc::{self, Receiver, Sender},
     thread,
-    time::Duration,
+    time::Duration, collections::HashSet,
 };
 use reqwest;
 use serde_json::{self, Value};
 use sfml::graphics::RenderWindow;
 
 use crate::{config::Config, userhandling::UserHandler, role};
-
+const WAIT_TIME: u64 = 5;
 
 pub struct Monitor {
     cfg: Config,
@@ -18,13 +18,13 @@ pub struct Monitor {
     tx: Sender<String>,
     rx: Receiver<String>,
     extx: Option<Sender<()>>,
-    blacklist: Vec<String>,
+    blacklist: HashSet<String>,
 }
 
 impl Monitor {
     pub fn new(cfg: Config, handler: UserHandler) -> Monitor {
         let (tx, rx) = mpsc::channel();
-        let blacklist: Vec<String> = fs::read_to_string("res/blacklist.txt").unwrap().lines().map(|s| s.to_string()).collect();
+        let blacklist: HashSet<String> = fs::read_to_string("res/blacklist.txt").unwrap().lines().map(|s| s.to_string()).collect();
 
         Monitor {
             cfg,
@@ -41,6 +41,8 @@ impl Monitor {
         
         let (extx, exrx) = mpsc::channel();
         self.extx = Some(extx);
+
+        println!("Monitoring {channel}...");
 
         thread::spawn(move || {
             let channel = channel;
@@ -64,7 +66,7 @@ impl Monitor {
                 }
 
                 // Sleep so we don't constantly get requests from the website
-                thread::sleep(Duration::from_secs(5));
+                thread::sleep(Duration::from_secs(WAIT_TIME));
             }
         });
     }
@@ -75,30 +77,34 @@ impl Monitor {
         // If ok, we should receive the new chatters list in string format
         if let Ok(resp) = self.rx.try_recv() {
             // Setup for building the vec of users
-            let json_resp: Value = serde_json::from_str(&resp).unwrap();
-            let mut current_chatters: Vec<(String, role::RoleType)> = Vec::new();
-            let capture_list = self.cfg.settings["CAPTURE"].as_array().unwrap();
-            
-            // Capture all users within the specified capture list, filtering out the blacklist also
-            for role in capture_list {
-                let mut other: Vec<(String, role::RoleType)> = json_resp["chatters"][&role.as_str().unwrap()]
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .map(|name| {
-                        (name.as_str().unwrap().to_string(), role::get_roletype(role.as_str().unwrap().to_string()))
-                    })
-                    .filter(|(n, _)| !self.blacklist.contains(n))
-                    .collect();
+            match serde_json::from_str(&resp) as Result<Value, _> {
+                Ok(json_resp) => {
+                    let mut current_chatters: Vec<(String, role::RoleType)> = Vec::new();
+                    let capture_list = self.cfg.settings["CAPTURE"].as_array().unwrap();
+                    
+                    // Capture all users within the specified capture list, filtering out the blacklist also
+                    for role in capture_list {
+                        let mut other: Vec<(String, role::RoleType)> = json_resp["chatters"][&role.as_str().unwrap()]
+                            .as_array()
+                            .unwrap()
+                            .iter()
+                            .map(|name| {
+                                (name.as_str().unwrap().to_string(), role::get_roletype(role.as_str().unwrap().to_string()))
+                            })
+                            .filter(|(n, _)| !self.blacklist.contains(n))
+                            .collect();
 
-                current_chatters.append(&mut other);
+                        current_chatters.append(&mut other);
+                    }
+
+
+                    // TODO: Think about using a single function, since we use the name to remove users
+                    // Handle user creation and removal
+                    self.handler.create_users(&current_chatters);
+                    self.handler.remove_departed(current_chatters.into_iter().map(|(n, _)| n).collect());
+                }
+                _ => {}
             }
-
-
-            // TODO: Think about using a single function, since we use the name to remove users
-            // Handle user creation and removal
-            self.handler.create_users(&current_chatters);
-            self.handler.remove_departed(current_chatters.into_iter().map(|(n, _)| n).collect());
         }
     }
 

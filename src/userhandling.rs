@@ -23,10 +23,13 @@ pub struct UserHandler {
     users: HashMap<String, AI>,
     resources: Resources,
     rng: ThreadRng,
+    user_limit: usize,
 }
 
 impl UserHandler {
     pub fn new(cfg: Config, display: (u32, u32), resources: Resources) -> Self {
+        let user_limit = serde_json::from_slice::<usize>(cfg.settings["USER_LIMIT"].to_string().as_bytes()).unwrap();
+
         Self {
             cfg,
             display,
@@ -34,6 +37,7 @@ impl UserHandler {
             users: HashMap::new(),
             resources,
             rng: rand::thread_rng(),
+            user_limit,
         }
     }
 
@@ -41,6 +45,10 @@ impl UserHandler {
         let colours = self.cfg.settings["COLOUR_PALETTE"].as_array().unwrap();
 
         for (user, role) in new_chatters {
+            if self.user_limit > 0 && self.users.len() >= self.user_limit {
+                return;
+            }
+
             if !self.users.contains_key(user) {
                 let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 {
                     -(USER_START_POS as i32)
