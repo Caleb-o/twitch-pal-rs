@@ -8,7 +8,7 @@ mod role;
 mod utils;
 
 use crate::{
-    animations::Animation, config::Config, resources::Resources, userhandling::UserHandler
+    config::Config, resources::Resources, userhandling::UserHandler
 };
 
 use monitor::Monitor;
@@ -39,26 +39,28 @@ fn main() {
 
     window.set_view(&view);
 
-    // Limit the framerate to 30 frames per second (this step is optional)
+    // Limit the framerate to 30 frames per second (this step is optional, but I like my CPU)
     window.set_framerate_limit(30);
 
     let mut resources = Resources::new();
-
-    let _ = Animation::new(
-        &mut resources,
-        "res/player_animations/idle".to_string(),
+    resources.load_animation(
+        "res/player_animations/idle",
+        resources::AnimationName::Idle,
         &[7, 7, 40],
     );
-    let _ = Animation::new(
-        &mut resources,
-        "res/player_animations/run".to_string(),
+    resources.load_animation(
+        "res/player_animations/run",
+        resources::AnimationName::Walking,
         &[7, 7],
     );
-
+    
     let background_col = utils::colour_from_cfg(&cfg, "BG_COL");
 
-    let mut user_handler = UserHandler::new(&cfg, display_size, &resources);
-    let mut monitor = Monitor::new(&cfg, &mut user_handler);
+    let mut monitor = Monitor::new(
+        cfg.clone(),
+        UserHandler::new(cfg.clone(), display_size, resources)
+    );
+
     monitor.start(cfg.settings["CHANNEL"].as_str().unwrap().to_string());
 
     // The main loop - ends as soon as the window is closed

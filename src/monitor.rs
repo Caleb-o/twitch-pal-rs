@@ -12,17 +12,17 @@ use sfml::graphics::RenderWindow;
 use crate::{config::Config, userhandling::UserHandler, role};
 
 
-pub struct Monitor<'a> {
-    cfg: &'a Config,
-    handler: &'a mut UserHandler<'a>,
+pub struct Monitor {
+    cfg: Config,
+    handler: UserHandler,
     tx: Sender<String>,
     rx: Receiver<String>,
     extx: Option<Sender<()>>,
     blacklist: Vec<String>,
 }
 
-impl<'a> Monitor<'a> {
-    pub fn new(cfg: &'a Config, handler: &'a mut UserHandler<'a>) -> Monitor<'a> {
+impl Monitor {
+    pub fn new(cfg: Config, handler: UserHandler) -> Monitor {
         let (tx, rx) = mpsc::channel();
         let blacklist: Vec<String> = fs::read_to_string("res/blacklist.txt").unwrap().lines().map(|s| s.to_string()).collect();
 

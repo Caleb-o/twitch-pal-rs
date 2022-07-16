@@ -16,21 +16,21 @@ use std::collections::HashMap;
 const USER_BOUNDS: u32 = 20;
 const USER_START_POS: u32 = 50;
 
-pub struct UserHandler<'a> {
-    cfg: &'a Config,
+pub struct UserHandler {
+    cfg: Config,
     display: (u32, u32),
     font: SfBox<Font>,
-    users: HashMap<String, AI<'a>>,
-    resources: &'a Resources,
+    users: HashMap<String, AI>,
+    resources: Resources,
     rng: ThreadRng,
 }
 
-impl<'a> UserHandler<'a> {
-    pub fn new(cfg: &'a Config, display: (u32, u32), resources: &'a Resources) -> Self {
+impl UserHandler {
+    pub fn new(cfg: Config, display: (u32, u32), resources: Resources) -> Self {
         Self {
             cfg,
             display,
-            font: Font::from_file("res/fonts/Hack.ttf").unwrap(),
+            font: Font::from_file("res/fonts/lucon.ttf").unwrap(),
             users: HashMap::new(),
             resources,
             rng: rand::thread_rng(),
@@ -56,7 +56,7 @@ impl<'a> UserHandler<'a> {
                 self.users.insert(
                     user.clone(),
                     AI::new(
-                        self.resources,
+                        &self.resources,
                         &user,
                         *role,
                         &self.font,
@@ -71,7 +71,7 @@ impl<'a> UserHandler<'a> {
 
     fn trigger_leave_on(&mut self, name: &String) {
         let user = self.users.get_mut(name).unwrap();
-        user.move_to_leave(Vector2f::new(-30.0, user.position.y));
+        user.move_to_leave(&self.resources, Vector2f::new(-30.0, user.position.y));
     }
 
     pub fn _say(&mut self, user_name: String, message: String) {
@@ -104,7 +104,7 @@ impl<'a> UserHandler<'a> {
 
     pub fn update(&mut self) {
         self.users.values_mut().for_each(|u| {
-            u.update();
+            u.update(&self.resources);
 
             // Move the user randomly, between the window bounds with padding
             if u.state != UserState::Leaving && self.rng.gen_range(0_u32..50_000) < 200 {
@@ -114,7 +114,7 @@ impl<'a> UserHandler<'a> {
                         as f32,
                     u.position.y,
                 );
-                u.move_to(pos);
+                u.move_to(&self.resources, pos);
             }
         });
     }

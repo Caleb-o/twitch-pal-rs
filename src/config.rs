@@ -23,6 +23,7 @@ const REQUEST_DEFAULT: &str = r#"{
 	"requests": []
 }"#;
 
+#[derive(Clone)]
 pub struct Config {
     pub settings: Value,
     pub requests: HashSet<String>,

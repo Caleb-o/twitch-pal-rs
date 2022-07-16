@@ -27,7 +27,8 @@ The event handler does not need to exist in the scene, it can live within the mo
 
 
 ## Modifications / Fixes
-* [ ] Convert some Strings to &str (where applicable)
+* [ ] Remove the need to use Strings, HashMaps and annotated references
+    * Using indexes/enums or Box<T> if needed
 
 
 ## Potential Features / TODO

@@ -1,4 +1,4 @@
-use crate::{animations::AnimController, resources::Resources, role};
+use crate::{animations::AnimController, resources::{Resources, AnimationName}, role};
 use sfml::{
     SfBox,
     graphics::{RenderTexture, Text, Color, Font, Sprite, RenderTarget, RenderWindow, Transformable},
@@ -15,13 +15,13 @@ pub enum UserState {
     Removable,
 }
 
-pub struct AI<'a> {
+pub struct AI {
     pub name: String,
     pub role: role::RoleType,
     pub state: UserState,
     pub position: Vector2f, // TODO: Remove this and just use sprite's position (Must use a Sprite, return Texture from anim controller)
     nameplate: RenderTexture,
-    anim_controller: AnimController<'a>,
+    anim_controller: AnimController,
     destination: Vector2f,
     flipped: bool,
     colour: Color,
@@ -32,9 +32,9 @@ fn dist(pos_a: &Vector2f, pos_b: &Vector2f) -> f32 {
     ((pos_a.x - pos_b.x) + (pos_a.y - pos_b.y)).sqrt()
 }
 
-impl<'a> AI<'a> {
+impl AI {
     pub fn new(
-        resources: &'a Resources,
+        resources: &Resources,
         name: &str,
         role: role::RoleType,
         font: &SfBox<Font>,
@@ -64,8 +64,7 @@ impl<'a> AI<'a> {
             position,
             anim_controller: AnimController::new(
                 resources,
-                "run".to_string(),
-                &["idle".to_string(), "run".to_string()],
+                AnimationName::Walking,
             ),
             nameplate,
             destination,
@@ -79,18 +78,18 @@ impl<'a> AI<'a> {
         // TODO: Draw chat bubble above user's heads
     }
 
-    pub fn move_to(&mut self, destination: Vector2f) {
+    pub fn move_to(&mut self, resources: &Resources, destination: Vector2f) {
         self.destination = destination;
-        self.anim_controller.set_action("run".to_string());
+        self.anim_controller.set_action(resources, AnimationName::Walking);
         self.flipped = destination.x < self.position.x;
     }
 
-    pub fn move_to_leave(&mut self, destination: Vector2f) {
-        self.move_to(destination);
+    pub fn move_to_leave(&mut self, resources: &Resources, destination: Vector2f) {
+        self.move_to(resources, destination);
         self.state = UserState::Leaving;
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, resources: &Resources) {
         self.anim_controller.update();
 
         // Check if we have a destination set
@@ -102,7 +101,7 @@ impl<'a> AI<'a> {
             };
 
             if dist(&self.position, &self.destination) <= MOVE_SPEED {
-                self.anim_controller.set_action("idle".to_string());
+                self.anim_controller.set_action(resources, AnimationName::Idle);
                 self.position.x = self.destination.x;
 
                 // Set can_remove to leaving
