@@ -1,7 +1,7 @@
 use sfml::graphics::Color;
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum RoleType {
 	VIEWER, VIP, MODERATOR, BROADCASTER
 }

@@ -851,6 +851,7 @@ stormzinr
 strangebing
 stream_achievements
 streamdeckerbot
+streamelements
 streamer_page_discord
 streamheroes
 streamkit

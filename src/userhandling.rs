@@ -23,12 +23,15 @@ pub struct UserHandler {
     users: HashMap<String, AI>,
     resources: Resources,
     rng: ThreadRng,
+
     user_limit: usize,
+    colours: Vec<serde_json::Value>,
 }
 
 impl UserHandler {
     pub fn new(cfg: Config, display: (u32, u32), resources: Resources) -> Self {
         let user_limit = serde_json::from_slice::<usize>(cfg.settings["USER_LIMIT"].to_string().as_bytes()).unwrap();
+        let colours = cfg.settings["COLOUR_PALETTE"].as_array().unwrap().to_vec();
 
         Self {
             cfg,
@@ -38,18 +41,18 @@ impl UserHandler {
             resources,
             rng: rand::thread_rng(),
             user_limit,
+            colours,
         }
     }
 
-    pub fn create_users(&mut self, new_chatters: &Vec<(String, RoleType)>) {
-        let colours = self.cfg.settings["COLOUR_PALETTE"].as_array().unwrap();
-
-        for (user, role) in new_chatters {
+    pub fn handle_user_change(&mut self, new_chatters: &Vec<(String, RoleType)>) {
+        for (new_user, role) in new_chatters {
             if self.user_limit > 0 && self.users.len() >= self.user_limit {
                 return;
             }
 
-            if !self.users.contains_key(user) {
+            // Add user, they're not in the current list or in the removal requests
+            if !self.users.contains_key(new_user) && !self.cfg.requests.contains(new_user) {
                 let start_x: i32 = if self.rng.gen_range(0_u32..2_u32) == 0 {
                     -(USER_START_POS as i32)
                 } else {
@@ -59,13 +62,13 @@ impl UserHandler {
                     .rng
                     .gen_range(USER_BOUNDS..self.display.0 - USER_BOUNDS);
 
-                let colour = utils::colour_from_json(&colours[self.rng.gen_range(0_usize..colours.len())]);
+                let colour = utils::colour_from_json(&self.colours[self.rng.gen_range(0_usize..self.colours.len())]);
 
                 self.users.insert(
-                    user.clone(),
+                    new_user.clone(),
                     AI::new(
                         &self.resources,
-                        &user,
+                        &new_user,
                         *role,
                         &self.font,
                         colour,
@@ -75,39 +78,45 @@ impl UserHandler {
                 );
             }
         }
+
+        self.remove_departed(new_chatters);
+    }
+
+    pub fn remove_departed(&mut self, new_chatters: &Vec<(String, RoleType)>) {
+        let mut users_departed: Vec<String> = Vec::new();
+
+        self.users.iter().for_each(|(name, ai)| {
+            if !new_chatters.contains(&(name.to_string(), ai.role)) || self.cfg.requests.contains(name) {
+                users_departed.push(name.clone());
+            }
+        });
+
+        users_departed.into_iter().for_each(|name| {
+            match self.users[&name].state {
+                UserState::Removable => {
+                    let _ = self.users.remove(&name);
+                }
+                UserState::Active => {
+                    self.users
+                        .get_mut(&name)
+                        .unwrap()
+                        .say("Goodbye".to_string());
+                    self.trigger_leave_on(&name);
+                }
+                _ => {}
+            }
+        });
     }
 
     fn trigger_leave_on(&mut self, name: &String) {
         let user = self.users.get_mut(name).unwrap();
         user.move_to_leave(&self.resources, Vector2f::new(-30.0, user.position.y));
+
+        println!("{name} is leaving...");
     }
 
     pub fn _say(&mut self, user_name: String, message: String) {
         self.users.get_mut(&user_name).unwrap().say(message);
-    }
-
-    pub fn remove_departed(&mut self, user_list: Vec<String>) {
-        // Bruh
-        let keys: Vec<String> = self.users.keys().map(|s| s.clone()).collect();
-
-        // Iterate over keys, removing and triggering a leave event
-        for user_name in keys {
-            if !user_list.contains(&user_name) || self.cfg.requests.contains(&user_name) {
-                match self.users[&user_name].state {
-                    UserState::Removable => {
-                        let _ = self.users.remove(&user_name);
-                    }
-                    UserState::Active => {
-                        self.users
-                            .get_mut(&user_name)
-                            .unwrap()
-                            .say("Goodbye".to_string());
-                        self.trigger_leave_on(&user_name);
-                    }
-                    _ => {}
-                }
-            }
-        }
     }
 
     pub fn update(&mut self) {

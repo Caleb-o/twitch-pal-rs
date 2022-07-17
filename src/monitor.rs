@@ -18,6 +18,7 @@ pub struct Monitor {
     tx: Sender<String>,
     rx: Receiver<String>,
     extx: Option<Sender<()>>,
+    chatter_buffer: Vec<(String, role::RoleType)>,
     blacklist: HashSet<String>,
 }
 
@@ -32,6 +33,7 @@ impl Monitor {
             tx,
             rx,
             extx: None,
+            chatter_buffer: Vec::new(),
             blacklist
         }
     }
@@ -50,8 +52,7 @@ impl Monitor {
             loop {
                 // Wait for a response from the web request
                 match reqwest::blocking::get(format!("https://tmi.twitch.tv/group/user/{channel}/chatters")) {
-                    Ok(res) => {
-                        let mut res = res;
+                    Ok(mut res) => {
                         let mut body = String::new();
                         res.read_to_string(&mut body).unwrap();
 
@@ -79,7 +80,7 @@ impl Monitor {
             // Setup for building the vec of users
             match serde_json::from_str(&resp) as Result<Value, _> {
                 Ok(json_resp) => {
-                    let mut current_chatters: Vec<(String, role::RoleType)> = Vec::new();
+                    self.chatter_buffer.clear();
                     let capture_list = self.cfg.settings["CAPTURE"].as_array().unwrap();
                     
                     // Capture all users within the specified capture list, filtering out the blacklist also
@@ -94,14 +95,11 @@ impl Monitor {
                             .filter(|(n, _)| !self.blacklist.contains(n))
                             .collect();
 
-                        current_chatters.append(&mut other);
+                        self.chatter_buffer.append(&mut other);
                     }
 
-
-                    // TODO: Think about using a single function, since we use the name to remove users
                     // Handle user creation and removal
-                    self.handler.create_users(&current_chatters);
-                    self.handler.remove_departed(current_chatters.into_iter().map(|(n, _)| n).collect());
+                    self.handler.handle_user_change(&self.chatter_buffer);
                 }
                 _ => {}
             }
