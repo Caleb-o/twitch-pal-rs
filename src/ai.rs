@@ -1,4 +1,4 @@
-use crate::{animations::AnimController, resources::{Resources, AnimationName}, role};
+use crate::{animations::{AnimationName, AnimController}, resources::Resources, role};
 use sfml::{
     SfBox,
     graphics::{RenderTexture, Text, Color, Font, Sprite, RenderTarget, RenderWindow, Transformable},

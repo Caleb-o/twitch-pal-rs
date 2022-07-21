@@ -1,9 +1,15 @@
-use crate::resources::{Resources, AnimationName};
+use crate::resources::Resources;
 use sfml::{
     graphics::{Sprite, Texture},
     SfBox,
 };
 use std::rc::Rc;
+
+#[derive(Clone, Copy, Hash, Eq, PartialEq)]
+#[repr(u8)]
+pub enum AnimationName {
+    Idle, Walking,
+}
 
 pub struct Animation {
     pub frames: Vec<SfBox<Texture>>,
@@ -15,7 +21,6 @@ pub struct AnimController {
     pub frame_counter: u32,
     pub current_anim_name: AnimationName,
     pub current_anim: Rc<Animation>,
-    // pub animations: 
 }
 
 impl Animation {

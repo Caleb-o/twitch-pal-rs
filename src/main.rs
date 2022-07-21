@@ -11,6 +11,7 @@ use crate::{
     config::Config, resources::Resources, userhandling::UserHandler
 };
 
+use animations::AnimationName;
 use monitor::Monitor;
 use sfml::{
     graphics::{RenderTarget, RenderWindow, View},
@@ -46,12 +47,12 @@ fn main() {
     let mut resources = Resources::new();
     resources.load_animation(
         "res/player_animations/idle",
-        resources::AnimationName::Idle,
+        AnimationName::Idle,
         &[7, 7, 40],
     );
     resources.load_animation(
         "res/player_animations/run",
-        resources::AnimationName::Walking,
+        AnimationName::Walking,
         &[7, 7],
     );
     

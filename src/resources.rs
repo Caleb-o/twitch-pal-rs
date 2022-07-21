@@ -1,15 +1,7 @@
-use crate::animations::Animation;
+use crate::animations::{Animation, AnimationName};
 use sfml::{graphics::Texture, SfBox};
 use std::collections::HashMap;
 use std::rc::Rc;
-
-// Make this not dumb or even non-existent
-
-#[derive(Clone, Copy, Hash, Eq, PartialEq)]
-#[repr(u8)]
-pub enum AnimationName {
-    Idle, Walking,
-}
 
 pub struct Resources {
     pub textures: HashMap<String, SfBox<Texture>>,
