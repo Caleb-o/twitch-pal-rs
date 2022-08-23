@@ -28,7 +28,7 @@ impl Resources {
 
     pub fn get_anim(&self, id: AnimationName) -> Option<Rc<Animation>> {
         if let Some(anim) = self.animations.get(&id) {
-            return Some((*anim).clone());
+            return Some(Rc::clone(anim));
         }
 
         None

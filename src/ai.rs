@@ -76,6 +76,7 @@ impl AI {
 
     pub fn say(&mut self, _message: String) {
         // TODO: Draw chat bubble above user's heads
+        unimplemented!("AI say is not implemented");
     }
 
     pub fn move_to(&mut self, resources: &Resources, destination: Vector2f) {
